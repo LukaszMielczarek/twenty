@@ -1,31 +1,34 @@
 image:
-  name: atlassian/default-image:4
+  name: 471112805160.dkr.ecr.eu-north-1.amazonaws.com/bitbucket-docker:latest
+  aws:
+    oidc-role: $AWS_ROLE
 
 definitions:
+  services:
+    docker:
+      memory: 7128
   steps:
-    - step: &build
-        name: Build & Test
+    - step: &build-and-push
+        name: Build & Push to ECR
         oidc: true
-        caches:
-          - docker
+        size: 2x
         services:
           - docker
+        caches:
+          - docker
         script:
-          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
-    - step: &push
-        name: Push to ECR
-        oidc: true
-        image:
-        script:
+          - export DOCKER_BUILDKIT=1
           - export AWS_DEFAULT_REGION=$AWS_REGION
           - export AWS_ROLE_ARN=$AWS_ROLE
           - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
           - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
           - aws ecr get-login-password | docker login --username AWS --password-stdin 471112805160.dkr.ecr.eu-north-1.amazonaws.com
           - docker push 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
     - step: &deploy-dev
         name: Deploy to ECS DEV
         oidc: true
+        size: 2x
         script:
           - pipe: atlassian/aws-ecs-deploy:1.12.1
             variables:
@@ -37,6 +40,7 @@ definitions:
     - step: &deploy-stage
         name: Deploy to ECS STAGE
         oidc: true
+        size: 2x
         script:
           - pipe: atlassian/aws-ecs-deploy:1.12.1
             variables:
@@ -48,6 +52,7 @@ definitions:
     - step: &deploy-prod
         name: Deploy to ECS PROD
         oidc: true
+        size: 2x
         script:
           - pipe: atlassian/aws-ecs-deploy:1.12.1
             variables:
@@ -59,13 +64,11 @@ definitions:
 
 pipelines:
   default:
-    - step: *build
-    - step: *push
+    - step: *build-and-push
     - step: *deploy-dev
   branches:
     main:
-      - step: *build
-      - step: *push
+      - step: *build-and-push
       - step: *deploy-dev
 #      - step: *deploy-stage
 #      - step: *deploy-prod
