@@ -20,7 +20,8 @@ definitions:
         name: Push to ECR
         oidc: true
         size: 2x
-        image:
+        services:
+          - docker
         script:
           - export AWS_DEFAULT_REGION=$AWS_REGION
           - export AWS_ROLE_ARN=$AWS_ROLE
