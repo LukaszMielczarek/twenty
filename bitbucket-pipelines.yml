@@ -17,6 +17,7 @@ definitions:
         services:
           - docker
         script:
+          - export DOCKER_BUILDKIT=1
           - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
     - step: &push
         name: Push to ECR
