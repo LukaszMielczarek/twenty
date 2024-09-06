@@ -1,3 +1,6 @@
+image:
+  name: atlassian/default-image:4
+
 definitions:
   steps:
     - step: &build
