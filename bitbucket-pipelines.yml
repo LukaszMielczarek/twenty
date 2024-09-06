@@ -8,28 +8,21 @@ definitions:
     docker:
       memory: 7128
   steps:
-    - step: &build
-        name: Build & Test
+    - step: &build-and-push
+        name: Build & Push to ECR
         oidc: true
         size: 2x
-        caches:
-          - docker
         services:
+          - docker
+        caches:
           - docker
         script:
           - export DOCKER_BUILDKIT=1
-          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
-    - step: &push
-        name: Push to ECR
-        oidc: true
-        size: 2x
-        services:
-          - docker
-        script:
           - export AWS_DEFAULT_REGION=$AWS_REGION
           - export AWS_ROLE_ARN=$AWS_ROLE
           - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
           - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
           - aws ecr get-login-password | docker login --username AWS --password-stdin 471112805160.dkr.ecr.eu-north-1.amazonaws.com
           - docker push 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
     - step: &deploy-dev
@@ -71,13 +64,11 @@ definitions:
 
 pipelines:
   default:
-    - step: *build
-    - step: *push
+    - step: *build-and-push
     - step: *deploy-dev
   branches:
     main:
-      - step: *build
-      - step: *push
+      - step: *build-and-push
       - step: *deploy-dev
 #      - step: *deploy-stage
 #      - step: *deploy-prod
