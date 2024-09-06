@@ -9,6 +9,7 @@ definitions:
     - step: &build
         name: Build & Test
         oidc: true
+        size: 2x
         caches:
           - docker
         services:
