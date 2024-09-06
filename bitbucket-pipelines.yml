@@ -1,6 +1,4 @@
 definitions:
-  variables:
-    ECR_URL: "471112805160.dkr.ecr.eu-north-1.amazonaws.com"
   steps:
     - step: &build
         name: Build & Test
@@ -10,7 +8,7 @@ definitions:
         services:
           - docker
         script:
-          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t $ECR_URL/twenty-crm:latest
+          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
     - step: &push
         name: Push to ECR
         oidc: true
@@ -20,8 +18,8 @@ definitions:
           - export AWS_ROLE_ARN=$AWS_ROLE
           - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
           - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
-          - aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URL
-          - docker push $ECR_URL:latest
+          - aws ecr get-login-password | docker login --username AWS --password-stdin 471112805160.dkr.ecr.eu-north-1.amazonaws.com
+          - docker push 471112805160.dkr.ecr.eu-north-1.amazonaws.com/twenty-crm:latest
     - step: &deploy-dev
         name: Deploy to ECS DEV
         oidc: true
