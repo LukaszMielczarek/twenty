@@ -1,5 +1,7 @@
 image:
-  name: atlassian/default-image:4
+  name: 471112805160.dkr.ecr.eu-north-1.amazonaws.com/bitbucket-docker:latest
+  aws:
+    oidc-role: $AWS_ROLE
 
 definitions:
   services:
