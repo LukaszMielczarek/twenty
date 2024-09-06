@@ -1,0 +1,75 @@
+image:
+  name: $ECR_URL/bitbucket-docker:latest
+  aws:
+    oidc-role: $AWS_ROLE
+
+definitions:
+  variables:
+    ECR_URL: "471112805160.dkr.ecr.eu-north-1.amazonaws.com"
+  steps:
+    - step: &build
+        name: Build & Test
+        oidc: true
+        caches:
+          - docker
+        services:
+          - docker
+        script:
+          - docker build -f ./packages/twenty-docker/twenty/Dockerfile . -t $ECR_URL/twenty-crm:latest
+    - step: &push
+        name: Push to ECR
+        oidc: true
+        image:
+        script:
+          - export AWS_DEFAULT_REGION=$AWS_REGION
+          - export AWS_ROLE_ARN=$AWS_ROLE
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - aws ecr get-login-password | docker login --username AWS --password-stdin $ECR_URL
+          - docker push $ECR_URL:latest
+    - step: &deploy-dev
+        name: Deploy to ECS DEV
+        oidc: true
+        script:
+          - pipe: atlassian/aws-ecs-deploy:1.12.1
+            variables:
+              AWS_DEFAULT_REGION: $AWS_REGION
+              AWS_OIDC_ROLE_ARN: $AWS_ROLE
+              CLUSTER_NAME: 'roofio-dev-ecs-cluster'
+              SERVICE_NAME: 'crm-app-service'
+              FORCE_NEW_DEPLOYMENT: 'true'
+    - step: &deploy-stage
+        name: Deploy to ECS STAGE
+        oidc: true
+        script:
+          - pipe: atlassian/aws-ecs-deploy:1.12.1
+            variables:
+              AWS_DEFAULT_REGION: $AWS_REGION
+              AWS_OIDC_ROLE_ARN: $AWS_ROLE
+              CLUSTER_NAME: 'roofio-stage-ecs-cluster'
+              SERVICE_NAME: 'crm-app-service'
+              FORCE_NEW_DEPLOYMENT: 'true'
+    - step: &deploy-prod
+        name: Deploy to ECS PROD
+        oidc: true
+        script:
+          - pipe: atlassian/aws-ecs-deploy:1.12.1
+            variables:
+              AWS_DEFAULT_REGION: $AWS_REGION
+              AWS_OIDC_ROLE_ARN: $AWS_ROLE
+              CLUSTER_NAME: 'roofio-prod-ecs-cluster'
+              SERVICE_NAME: 'crm-app-service'
+              FORCE_NEW_DEPLOYMENT: 'true'
+
+pipelines:
+  default:
+    - step: *build
+    - step: *push
+    - step: *deploy-dev
+  branches:
+    main:
+      - step: *build
+      - step: *push
+      - step: *deploy-dev
+#      - step: *deploy-stage
+#      - step: *deploy-prod
