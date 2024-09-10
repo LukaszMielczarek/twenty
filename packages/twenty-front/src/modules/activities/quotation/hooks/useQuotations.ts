@@ -36,8 +36,10 @@ export const useQuotations = (targetableObject: ActivityTargetableObject) => {
     const fetchQuotations = async () => {
       try {
         // Filter for .json attachments
-        const jsonAttachments = attachments.filter((attachment) =>
-          attachment.name.endsWith('.json'),
+        const jsonAttachments = attachments.filter(
+          (attachment) =>
+            attachment.name.includes('calculation') &&
+            attachment.name.endsWith('.json'),
         );
         // Download all quotations in parallel
         const quotations = await Promise.all(
