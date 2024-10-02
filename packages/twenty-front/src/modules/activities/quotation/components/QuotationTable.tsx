@@ -1,102 +1,235 @@
-import styled from '@emotion/styled';
-
-import { Quotation } from '@/activities/types/Quotation';
-
 import {
-  generateColumns,
-  generateRows,
-} from '@/activities/quotation/utils/QuotationUtils';
-import { Table } from '@/spreadsheet-import/components/Table';
-import { useMemo } from 'react';
+  DataGrid, GridCellModes,
+  GridCellModesModel,
+  GridCellParams
+} from '@mui/x-data-grid';
 
-const StyledTable = styled.div`
-  align-items: center;
-  background: ${({ theme }) => theme.background.secondary};
-  border: 1px solid ${({ theme }) => theme.border.color.medium};
-  border-radius: ${({ theme }) => theme.border.radius.md};
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  justify-content: space-between;
-  max-width: unset;
-`;
-
-const StyledTableDetails = styled.div`
-  align-items: center;
-  align-self: stretch;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(2)};
-  justify-content: center;
-  padding: ${({ theme }) => theme.spacing(2)};
-`;
-
-const StyledTableContent = styled.div`
-  align-self: stretch;
-  color: ${({ theme }) => theme.font.color.secondary};
-  line-break: anywhere;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: pre-line;
-`;
-
-const StyledTableSummary = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${({ theme }) => theme.spacing(3)};
-  padding: ${({ theme }) => theme.spacing(2)};
-  width: calc(100% - ${({ theme }) => theme.spacing(4)});
-`;
-
-const StyledTableSummaryHeader = styled.div`
-  display: flex;
-  justify-content: center;
-`;
-
-const StyledTableSummaryTitle = styled.span`
-  color: ${({ theme }) => theme.font.color.secondary};
-  font-size: ${({ theme }) => theme.font.size.md};
-  font-weight: ${({ theme }) => theme.font.weight.semiBold};
-`;
-
-const StyledTableSummaryContent = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  gap: ${({ theme }) => theme.spacing(1)};
-`;
-
-const StyledTableSummaryLabel = styled.span`
-  color: ${({ theme }) => theme.font.color.tertiary};
-  font-weight: ${({ theme }) => theme.font.weight.medium};
-`;
+import {Item, Quotation} from '@/activities/types/Quotation';
+import {Button} from '@/ui/input/button/components/Button';
+import {useCallback, useEffect, useState} from 'react';
+import createTheme, {Theme} from '@mui/material/styles/createTheme';
+import {ThemeProvider, darken, lighten} from '@mui/material';
+import {useColumns} from "@/activities/quotation/hooks/useColumns";
+import {useCachedProductList} from "@/activities/quotation/hooks/useCachedProductList";
+import Grid from "@mui/material/Grid2";
+import {useTheme} from "@emotion/react";
+import {useRecalculate} from "@/activities/quotation/hooks/useRecalculate";
 
 export const QuotationTable = ({
-  quotation,
-}: {
+                                 quotation,
+                               }: {
   quotation: Quotation | null;
 }) => {
-  const data = useMemo(() => generateRows(quotation), [quotation]);
-  const columns = useMemo(() => generateColumns(), []);
+  const [data, setData] = useState<Item[]>(quotation?.items || []);
+  const [changedRows, setChangedRows] = useState<string[]>([]);
+  const [touched, setTouched] = useState<boolean>();
+  const [cellModesModel, setCellModesModel] = useState<GridCellModesModel>({});
 
-  return (
-    <StyledTable>
-      <StyledTableDetails>
-        <StyledTableContent>
-          <Table rows={data} columns={columns} className={'rdg-example'} />
-        </StyledTableContent>
-      </StyledTableDetails>
-      <StyledTableSummary>
-        <StyledTableSummaryHeader>
-          <StyledTableSummaryTitle>TOTAL SUMMARY</StyledTableSummaryTitle>
-        </StyledTableSummaryHeader>
-        <StyledTableSummaryContent>
-          <StyledTableSummaryLabel>{`Total Gross Value : ${quotation?.totalSummary.totalGrossValue}`}</StyledTableSummaryLabel>
-          <StyledTableSummaryLabel>{`Total Net Value : ${quotation?.totalSummary.totalNetValue}`}</StyledTableSummaryLabel>
-          <StyledTableSummaryLabel>{`Total VAT Value : ${quotation?.totalSummary.totalVatValue}`}</StyledTableSummaryLabel>
-        </StyledTableSummaryContent>
-      </StyledTableSummary>
-    </StyledTable>
+  const [products, updateList] = useCachedProductList();
+  const columns = useColumns(products);
+  const theme = useTheme();
+
+  const recalculate = useRecalculate(quotation!.id);
+
+  const MuiTheme = createTheme({
+    palette: {
+      mode: theme.name === 'light' ? 'light' : 'dark',
+    }
+  });
+
+  const getBackgroundColor = (color: string, theme: Theme, coefficient: number) => ({
+    backgroundColor: darken(color, coefficient),
+    ...theme.applyStyles('light', {
+      backgroundColor: lighten(color, coefficient),
+    }),
+  });
+
+
+  const handleCellClick = useCallback(
+      (params: GridCellParams, event: React.MouseEvent) => {
+        if (!params.isEditable) {
+          return;
+        }
+
+        // Ignore portal
+        if (
+            (event.target as any).nodeType === 1 &&
+            !event.currentTarget.contains(event.target as Element)
+        ) {
+          return;
+        }
+
+        setCellModesModel((prevModel) => {
+          return {
+            // Revert the mode of the other cells from other rows
+            ...Object.keys(prevModel).reduce(
+                (acc, id) => ({
+                  ...acc,
+                  [id]: Object.keys(prevModel[id]).reduce(
+                      (acc2, field) => ({
+                        ...acc2,
+                        [field]: {mode: GridCellModes.View},
+                      }),
+                      {},
+                  ),
+                }),
+                {},
+            ),
+            [params.id]: {
+              // Revert the mode of other cells in the same row
+              ...Object.keys(prevModel[params.id] || {}).reduce(
+                  (acc, field) => ({...acc, [field]: {mode: GridCellModes.View}}),
+                  {},
+              ),
+              [params.field]: {mode: GridCellModes.Edit},
+            },
+          };
+        });
+      },
+      [],
   );
+
+  const handleCellModesModelChange = useCallback(
+      (newModel: GridCellModesModel) => {
+        setCellModesModel(newModel);
+      },
+      [],
+  );
+
+  useEffect(() => {
+    let newChangedRows: string[] = [];
+    data.forEach(row => {
+      const originalRow = quotation?.items.find(item => item.id === row.id);
+      if (originalRow === undefined || (originalRow && JSON.stringify(originalRow) !== JSON.stringify(row))) {
+        newChangedRows.push(row.id)
+      }
+      if (row.manufacturerId && row.categoryId) {
+        updateList(row.manufacturerId, row.categoryId);
+      }
+    })
+    setChangedRows(newChangedRows)
+  }, [data])
+
+  const processChanges = async (prevRow: Item, newRow: Item) => {
+    if (prevRow.manufacturerId !== newRow.manufacturerId) {
+      newRow.categoryId = "";
+      newRow.productId = "";
+      newRow.netPrice = 0;
+      newRow.grossPrice = 0;
+      newRow.unitPrice = 0;
+      newRow.vatAmount = 0;
+    } else if (prevRow.categoryId !== newRow.categoryId) {
+      newRow.productId = "";
+      newRow.netPrice = 0;
+      newRow.grossPrice = 0;
+      newRow.unitPrice = 0;
+      newRow.vatAmount = 0;
+    } else if(prevRow.productId !== newRow.productId){
+      var response = await recalculate(newRow);
+      newRow = response.data
+    } else if ((prevRow.unitPrice !== newRow.unitPrice || prevRow.quantity !== newRow.quantity) && newRow.unitPrice && newRow.quantity) {
+      newRow.netPrice = newRow.unitPrice * newRow.quantity;
+    }
+    return newRow;
+  }
+
+  const addNewRow = () => {
+    let newData = [...data];
+    newData.push({
+      id: self.crypto.randomUUID()
+    })
+    setData(newData);
+  }
+
+  const getFooter = () => {
+    return <div>
+      <Grid container spacing={4} style={{padding: "1rem"}}>
+        <Grid size={4}>
+          <Button title="Add row" onClick={() => {
+            addNewRow()
+          }}></Button>
+        </Grid>
+        <Grid size={4}>
+        </Grid>
+      </Grid>
+    </div>
+  }
+
+  const getRowStyle = (row: any) => {
+    if (changedRows.find(id => id == row.id)) {
+      return 'modified'
+    }
+    return ''
+  }
+
+  return <>
+    <div style={{
+      marginBottom: "1rem"
+    }}>
+      <ThemeProvider theme={MuiTheme}>
+        <DataGrid rows={data}
+                  slots={{
+                    footer: getFooter,
+                  }}
+                  getRowClassName={(params) => {
+                    return getRowStyle(params.row)
+                  }}
+                  cellModesModel={cellModesModel}
+                  onCellModesModelChange={handleCellModesModelChange}
+                  onCellClick={handleCellClick}
+                  onCellEditStop={(event) => {
+                    if (event.row.manufacturerId && event.row.categoryId) {
+                      updateList(event.row.manufacturerId, event.row.categoryId);
+                    }
+                  }}
+                  onProcessRowUpdateError={(error) => {
+                    console.log(error);
+                  }}
+                  processRowUpdate={async (newRow, prevRow) => {
+                    let index = data.findIndex(row => row.id === prevRow.id);
+                    let newData = [...data];
+                    newData[index] = await processChanges(prevRow, newRow);
+                    console.log(newData);
+                    setData(newData);
+                    setTouched(true);
+                    return newRow;
+                  }}
+                  sx={(theme) => ({
+                    '& .modified': {
+                      ...getBackgroundColor(theme.palette.info.main, theme, 0.7),
+                      '&:hover': {
+                        ...getBackgroundColor(theme.palette.info.main, theme, 0.6),
+                      },
+                      '&.Mui-selected': {
+                        ...getBackgroundColor(theme.palette.info.main, theme, 0.5),
+                        '&:hover': {
+                          ...getBackgroundColor(theme.palette.info.main, theme, 0.4),
+                        },
+                      },
+                    },
+                    '& .new': {
+                      ...getBackgroundColor(theme.palette.success.main, theme, 0.7),
+                      '&:hover': {
+                        ...getBackgroundColor(theme.palette.success.main, theme, 0.6),
+                      },
+                      '&.Mui-selected': {
+                        ...getBackgroundColor(theme.palette.success.main, theme, 0.5),
+                        '&:hover': {
+                          ...getBackgroundColor(theme.palette.success.main, theme, 0.4),
+                        },
+                      },
+                    }
+                  })}
+                  columns={columns}/>
+      </ThemeProvider>
+    </div>
+
+    {touched && <div style={{
+      display: 'flex',
+      gap: '1rem'
+    }}><Button title="Update calculation"></Button>
+      <Button title={"Reset calculation"} onClick={() => {
+        setData(quotation!.items)
+      }}></Button></div>}
+  </>;
 };

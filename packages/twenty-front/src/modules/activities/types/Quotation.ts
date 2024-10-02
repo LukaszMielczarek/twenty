@@ -1,4 +1,4 @@
-import { UUID } from 'crypto';
+import {UUID} from 'crypto';
 
 export type Quotation = {
   id: UUID;
@@ -8,8 +8,7 @@ export type Quotation = {
   roofAnalysisInfo: RoofAnalysisInfo;
   customer: Customer;
   warehouse: Warehouse;
-  manufacturers: Manufacturer[];
-  totalSummary: Summary;
+  items: Item[];
 };
 
 export type RoofAnalysisInfo = {
@@ -31,33 +30,16 @@ export type Warehouse = {
   phone: string;
 };
 
-export type Manufacturer = {
-  manufacturerId: UUID;
-  manufacturerName: string;
-  categories: Categories[];
-  summary: Summary;
-};
-
-export type Categories = {
-  categoryId: UUID;
-  categoryName: string;
-  products: Product[];
-  summary: Summary;
-};
-
-export type Product = {
-  productId: UUID;
-  productName: string;
-  quantity: number;
-  unitOfMeasure: string;
-  unitPrice: number;
-  netPrice: number;
-  vatAmount: number;
-  grossPrice: number;
-};
-
-export type Summary = {
-  totalNetValue: 2000;
-  totalVatValue: 460;
-  totalGrossValue: 2460;
+export type Item = {
+  id: string;
+  manufacturerId?: string;
+  categoryId?: string;
+  productId?: string;
+  productName?: string;
+  quantity?: number;
+  unitOfMeasure?: string;
+  unitPrice?: number;
+  netPrice?: number;
+  vatAmount?: number;
+  grossPrice?: number;
 };

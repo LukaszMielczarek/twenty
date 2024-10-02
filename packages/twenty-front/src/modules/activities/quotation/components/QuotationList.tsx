@@ -41,10 +41,6 @@ const StyledCount = styled.span`
 `;
 
 const StyledQuotationContainer = styled.div`
-  display: grid;
-  gap: ${({ theme }) => theme.spacing(4)};
-  grid-auto-rows: 1fr;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   width: 100%;
 `;
 
