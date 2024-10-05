@@ -129,6 +129,8 @@ export const QuotationTable = ({
       newRow = response.data
     } else if ((prevRow.unitPrice !== newRow.unitPrice || prevRow.quantity !== newRow.quantity) && newRow.unitPrice && newRow.quantity) {
       newRow.netPrice = newRow.unitPrice * newRow.quantity;
+      newRow.vatAmount = newRow.netPrice * (newRow.vat! / 100);
+      newRow.grossPrice = newRow.netPrice + newRow.vatAmount;
     }
     return newRow;
   }
@@ -189,7 +191,6 @@ export const QuotationTable = ({
                     let index = data.findIndex(row => row.id === prevRow.id);
                     let newData = [...data];
                     newData[index] = await processChanges(prevRow, newRow);
-                    console.log(newData);
                     setData(newData);
                     setTouched(true);
                     return newRow;
