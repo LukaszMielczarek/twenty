@@ -42,4 +42,5 @@ export type Item = {
   netPrice?: number;
   vatAmount?: number;
   grossPrice?: number;
+  vat?: number;
 };
