@@ -14,14 +14,17 @@ import { Calendar } from '@/activities/calendar/components/Calendar';
 import { EmailThreads } from '@/activities/emails/components/EmailThreads';
 import { Attachments } from '@/activities/files/components/Attachments';
 import { Notes } from '@/activities/notes/components/Notes';
+import { Quotations } from '@/activities/quotation/components/Quotations';
 import { ObjectTasks } from '@/activities/tasks/components/ObjectTasks';
 import { TimelineActivities } from '@/activities/timelineActivities/components/TimelineActivities';
 import { TimelineActivitiesQueryEffect } from '@/activities/timelineActivities/components/TimelineActivitiesQueryEffect';
 import { ActivityTargetableObject } from '@/activities/types/ActivityTargetableEntity';
 import { CoreObjectNameSingular } from '@/object-metadata/types/CoreObjectNameSingular';
+import { CustomObjectNameSingular } from '@/object-metadata/types/CustomObjectNameSingular';
 import { TabList } from '@/ui/layout/tab/components/TabList';
 import { useTabList } from '@/ui/layout/tab/hooks/useTabList';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
+import { IconCalculator } from '@tabler/icons-react';
 
 const StyledShowPageRightContainer = styled.div<{ isMobile: boolean }>`
   display: flex;
@@ -77,6 +80,10 @@ export const ShowPageRightContainer = ({
     CoreObjectNameSingular.Person,
   ].includes(targetObjectNameSingular);
 
+  const isOffer = [CustomObjectNameSingular.Offer].includes(
+    targetableObject.targetObjectNameSingular as CustomObjectNameSingular,
+  );
+
   const shouldDisplayCalendarTab = isCompanyOrPerson;
   const shouldDisplayEmailsTab = emails && isCompanyOrPerson;
 
@@ -110,6 +117,12 @@ export const ShowPageRightContainer = ({
       Icon: IconCalendarEvent,
       hide: !shouldDisplayCalendarTab,
     },
+    {
+      id: 'quotations',
+      title: 'Quotations',
+      Icon: IconCalculator,
+      hide: !isOffer,
+    },
   ];
 
   const renderActiveTabContent = () => {
@@ -135,6 +148,8 @@ export const ShowPageRightContainer = ({
         return <EmailThreads targetableObject={targetableObject} />;
       case 'calendar':
         return <Calendar targetableObject={targetableObject} />;
+      case 'quotations':
+        return <Quotations targetableObject={targetableObject} />;
       default:
         return <></>;
     }
