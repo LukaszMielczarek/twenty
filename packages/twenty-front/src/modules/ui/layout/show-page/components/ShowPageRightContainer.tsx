@@ -24,7 +24,8 @@ import { CustomObjectNameSingular } from '@/object-metadata/types/CustomObjectNa
 import { TabList } from '@/ui/layout/tab/components/TabList';
 import { useTabList } from '@/ui/layout/tab/hooks/useTabList';
 import { useIsMobile } from '@/ui/utilities/responsive/hooks/useIsMobile';
-import { IconCalculator } from '@tabler/icons-react';
+import { IconCalculator, IconTemplate } from '@tabler/icons-react';
+import { Templates } from '@/activities/template/components/Templates';
 
 const StyledShowPageRightContainer = styled.div<{ isMobile: boolean }>`
   display: flex;
@@ -118,6 +119,12 @@ export const ShowPageRightContainer = ({
       hide: !shouldDisplayCalendarTab,
     },
     {
+      id: 'templates',
+      title: 'Templates',
+      Icon: IconTemplate,
+      hide: !isOffer,
+    },
+    {
       id: 'quotations',
       title: 'Quotations',
       Icon: IconCalculator,
@@ -148,6 +155,8 @@ export const ShowPageRightContainer = ({
         return <EmailThreads targetableObject={targetableObject} />;
       case 'calendar':
         return <Calendar targetableObject={targetableObject} />;
+      case 'templates':
+        return <Templates targetableObject={targetableObject} />;
       case 'quotations':
         return <Quotations targetableObject={targetableObject} />;
       default:

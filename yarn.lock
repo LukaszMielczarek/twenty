@@ -16116,24 +16116,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/query-core@npm:5.56.2":
-  version: 5.56.2
-  resolution: "@tanstack/query-core@npm:5.56.2"
-  checksum: 54ff55f02b01f6ba089f4965bfd46f430c18ce7e11d874de04c4d58cc8f698598b41e1c017ba029d08ae75e321e546b26f1ea7f788474db265eeba46e780f2f6
-  languageName: node
-  linkType: hard
-
-"@tanstack/react-query@npm:^5.56.2":
-  version: 5.56.2
-  resolution: "@tanstack/react-query@npm:5.56.2"
-  dependencies:
-    "@tanstack/query-core": "npm:5.56.2"
-  peerDependencies:
-    react: ^18 || ^19
-  checksum: 6e883b4ca1948f990215b7bce194251faf13a79c6ecf3f3c660af6c6788ed113ab629cefdafb496dfb04866f12dd48d7314e936b75c881b6749127b6496ac8fd
-  languageName: node
-  linkType: hard
-
 "@testing-library/dom@npm:^9.0.0":
   version: 9.3.4
   resolution: "@testing-library/dom@npm:9.3.4"
@@ -19773,35 +19755,6 @@ __metadata:
   version: 1.0.2
   resolution: "afterframe@npm:1.0.2"
   checksum: 72fdd06a905128701c0e78fa287901e46649e3bf6ed9fc718894ee4c80a14c33d73d56fdaa45b58f79016afb1eb18e4cfaad5cbd668912855f69e114e82827c3
-  languageName: node
-  linkType: hard
-
-"ag-charts-types@npm:10.2.0":
-  version: 10.2.0
-  resolution: "ag-charts-types@npm:10.2.0"
-  checksum: 7007c7892d1c5ec039a8808e8d0f2104f85e633a7b8c129d0438e4200a3f2d0d3a78e3fb032793ada8a445fb08fbcb4e7f8c2a8bdf52a1d4339c1064dd43de1b
-  languageName: node
-  linkType: hard
-
-"ag-grid-community@npm:32.2.0":
-  version: 32.2.0
-  resolution: "ag-grid-community@npm:32.2.0"
-  dependencies:
-    ag-charts-types: "npm:10.2.0"
-  checksum: 22c5671f5b427ab82a0d1a012ea0cf486adc2646aef98c6b4d66763c286a27dc5bfaf3ba670ad2d88df3ad92651d23f95db99279fb78b39d38348bf3bc9a002d
-  languageName: node
-  linkType: hard
-
-"ag-grid-react@npm:^32.2.0":
-  version: 32.2.0
-  resolution: "ag-grid-react@npm:32.2.0"
-  dependencies:
-    ag-grid-community: "npm:32.2.0"
-    prop-types: "npm:^15.8.1"
-  peerDependencies:
-    react: ^16.3.0 || ^17.0.0 || ^18.0.0
-    react-dom: ^16.3.0 || ^17.0.0 || ^18.0.0
-  checksum: bc63e9acc183c21e843c84dd0bdf468532384e4eabb905acb7816ff9d6f9d1f0fe2eba968f013146766aba9c639d94fd780005d07d8e4439f1ab08d0be8a6e15
   languageName: node
   linkType: hard
 
@@ -48319,7 +48272,6 @@ __metadata:
     "@swc/helpers": "npm:~0.5.2"
     "@swc/jest": "npm:^0.2.29"
     "@tabler/icons-react": "npm:^2.44.0"
-    "@tanstack/react-query": "npm:^5.56.2"
     "@testing-library/jest-dom": "npm:^6.1.5"
     "@testing-library/react": "npm:14.0.0"
     "@types/addressparser": "npm:^1.0.3"
@@ -48376,7 +48328,6 @@ __metadata:
     add: "npm:^2.0.6"
     addressparser: "npm:^1.0.1"
     afterframe: "npm:^1.0.2"
-    ag-grid-react: "npm:^32.2.0"
     apollo-server-express: "npm:^3.12.0"
     apollo-upload-client: "npm:^17.0.0"
     axios: "npm:^1.6.2"
