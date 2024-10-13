@@ -7,7 +7,7 @@ console.log(`CALCULATOR API URL: ${CALCULATOR_URL}`)
 
 export const getManufacturers = async () => {
     try {
-        const response = await fetch(PRODUCT_CATALOGUE_URL + "manufacturers");
+        const response = await fetch(PRODUCT_CATALOGUE_URL + "/manufacturers");
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -21,7 +21,7 @@ export const getManufacturers = async () => {
 
 export const getCategories = async () => {
     try {
-        const response = await fetch(PRODUCT_CATALOGUE_URL + "categories");
+        const response = await fetch(PRODUCT_CATALOGUE_URL + "/categories");
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -35,7 +35,7 @@ export const getCategories = async () => {
 
 export const getProducts = async (manufacturerId: string, categoryId: string) => {
     try {
-        const response = await fetch(PRODUCT_CATALOGUE_URL + `products?mfc-id=${manufacturerId}&category-id=${categoryId}`);
+        const response = await fetch(PRODUCT_CATALOGUE_URL + `/products?mfc-id=${manufacturerId}&category-id=${categoryId}`);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -50,7 +50,7 @@ export const getProducts = async (manufacturerId: string, categoryId: string) =>
 export const updateRow = async (calculationId: string, itemId: string, manufacturerId: string,
                                 categoryId: string, productId: string) => {
     try {
-        const response = await fetch(CALCULATOR_URL + `calculations/${calculationId}/items/${itemId}`,
+        const response = await fetch(CALCULATOR_URL + `/calculations/${calculationId}/items/${itemId}`,
             {
                 method: 'PATCH',
                 headers: {
