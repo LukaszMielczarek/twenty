@@ -4,7 +4,7 @@ import {Template} from '@/activities/types/Template';
 import {convertFromDateToString, convertToDate} from '../utils/Utils.';
 import {UUID} from 'crypto';
 
-export const PRODUCT_CATALOGUE_URL = process.env.REACT_APP_PRODUCT_CATALOGUE_API_URL
+export const PRODUCT_CATALOGUE_URL = import.meta.env.REACT_APP_PRODUCT_CATALOGUE_API_URL
 console.log(`PRODUCT CATALOGUE API URL: ${PRODUCT_CATALOGUE_URL}`)
 
 export const getManufacturers = async () => {

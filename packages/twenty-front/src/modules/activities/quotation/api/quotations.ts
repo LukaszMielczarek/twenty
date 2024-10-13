@@ -1,8 +1,8 @@
 // Todo - load urls from envs or whatever you want here
 
-export const PRODUCT_CATALOGUE_URL = process.env.REACT_APP_PRODUCT_CATALOGUE_API_URL
+export const PRODUCT_CATALOGUE_URL = import.meta.env.REACT_APP_PRODUCT_CATALOGUE_API_URL
 console.log(`PRODUCT CATALOGUE API URL: ${PRODUCT_CATALOGUE_URL}`)
-export const CALCULATOR_URL = process.env.REACT_APP_CALCULATOR_API_URL
+export const CALCULATOR_URL = import.meta.env.REACT_APP_CALCULATOR_API_URL
 console.log(`CALCULATOR API URL: ${CALCULATOR_URL}`)
 
 export const getManufacturers = async () => {
