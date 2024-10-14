@@ -36,24 +36,25 @@ export const getCategories = async () => {
 };
 
 export const getProducts = async (
-    manufacturerId: string,
-    categoryId: string,
-) => {
-    try {
-        const response = await fetch(
-            PRODUCT_CATALOGUE_URL +
-            `/products?mfc-id=${manufacturerId}&category-id=${categoryId}`,
-        );
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        manufacturerId: string,
+        categoryId: string,
+    ) => {
+        try {
+            const response = await fetch(
+                PRODUCT_CATALOGUE_URL +
+                `/products?mfc-id=${manufacturerId}&category-id=${categoryId}`,
+            );
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
         }
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Fetch error:', error);
-        throw error;
     }
-};
+;
 export const getTemplatesForWarehouse = async (warehouseId: UUID) => {
     try {
         const response = await fetch(PRODUCT_CATALOGUE_URL + `/templates?warehouse-id=${warehouseId}`);
@@ -82,6 +83,40 @@ export const upsertTemplate = async (
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return await response.json();
+    } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
+    }
+};
+
+export const deleteTemplate = async (
+    templateId: UUID | undefined,
+) => {
+    try {
+        const response = await fetch(`${PRODUCT_CATALOGUE_URL}/templates/${templateId}`, {
+            method: 'DELETE',
+            headers: {'content-type': 'application/json'},
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        throw error;
+    }
+};
+
+export const deleteTemplateItem = async (
+    templateItemId: UUID | undefined,
+) => {
+    try {
+        const response = await fetch(`${PRODUCT_CATALOGUE_URL}/templates/items/${templateItemId}`, {
+            method: 'DELETE',
+            headers: {'content-type': 'application/json'},
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
     } catch (error) {
         console.error('Fetch error:', error);
         throw error;

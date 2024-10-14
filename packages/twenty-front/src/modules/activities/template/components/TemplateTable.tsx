@@ -1,4 +1,4 @@
-import {DataGrid, GridColDef, GridPagination, GridRowSelectionModel} from '@mui/x-data-grid';
+import {DataGrid, GridColDef, GridPagination, GridRenderCellParams, GridRowSelectionModel} from '@mui/x-data-grid';
 import {useRecoilState} from 'recoil';
 import {currentTemplatesState} from '../states/currentTemplatesState';
 import {currentSelectedTemplateState} from '../states/currentSelectedTemplateState';
@@ -6,10 +6,12 @@ import styled from '@emotion/styled';
 import {Button} from '@/ui/input/button/components/Button';
 import Grid from '@mui/material/Grid2';
 import {useEffect, useState} from 'react';
-import {Template} from '@/activities/types/Template';
+import {Template, TemplateProps} from '@/activities/types/Template';
 import {ThemeProvider, useTheme} from '@emotion/react';
-import {createTheme} from '@mui/material';
-import {UUID} from 'crypto';
+import {createTheme, Divider, Stack} from '@mui/material';
+import {deleteTemplate} from '../api/templates';
+import {useUpdateOneRecord} from '@/object-record/hooks/useUpdateOneRecord';
+import {CustomObjectNameSingular} from '@/object-metadata/types/CustomObjectNameSingular';
 
 const StyledTemplateTable = styled.div`
     display: flex;
@@ -31,7 +33,7 @@ const StyledTemplatesTableFooter = styled.div`
     padding: 1rem;
 `;
 
-export const TemplateTable = ({warehouseId}: { warehouseId: UUID }) => {
+export const TemplateTable = ({warehouseId, offerId}: TemplateProps) => {
     const theme = useTheme();
     const MuiTheme = createTheme({
         palette: {
@@ -45,47 +47,9 @@ export const TemplateTable = ({warehouseId}: { warehouseId: UUID }) => {
     );
     const [rows, setRows] = useState<Template[]>(templates);
 
-    const columns: GridColDef[] = [
-        {
-            field: 'id',
-            headerName: 'ID',
-            editable: false,
-            type: 'string',
-            flex: 1,
-        },
-        {
-            field: 'name',
-            headerName: 'NAME',
-            editable: true,
-            type: 'string',
-            flex: 1,
-        },
-        {
-            field: 'description',
-            headerName: 'DESCRIPTION',
-            editable: true,
-            type: 'string',
-            flex: 1,
-        },
-        {
-            field: 'validFrom',
-            headerName: 'VALID FROM',
-            editable: true,
-            type: 'dateTime',
-            flex: 1,
-        },
-        {
-            field: 'validTo',
-            headerName: 'VALID TO',
-            editable: true,
-            type: 'dateTime',
-            flex: 1,
-        },
-    ];
-
-    useEffect(() => {
-        setRows(templates);
-    }, []);
+    const {updateOneRecord: updateOneActivity} = useUpdateOneRecord<any>({
+        objectNameSingular: CustomObjectNameSingular.Offer,
+    });
 
     const handleProcessRowUpdate = async (
         updatedRow: Template,
@@ -134,6 +98,78 @@ export const TemplateTable = ({warehouseId}: { warehouseId: UUID }) => {
         setRows(newRows);
         setSelectedTemplate(newRow);
     };
+
+    const handleUse = async (e: any, params: GridRenderCellParams) => {
+        const currentRow = params.row;
+        return await updateOneActivity?.({
+            idToUpdate: offerId,
+            updateOneRecordInput: {
+                templateId: currentRow.id
+            },
+        }).then(() => console.log(`Succesfuly set TemplateId: ${currentRow.id} on Offer: ${offerId}`));
+    }
+
+    const handleDelete = (e: any, params: GridRenderCellParams) => {
+        const currentRow = params.row;
+        const template = templates.find(template => template.id === currentRow.id)
+        if (template) {
+            deleteTemplate(template.id);
+        }
+        const newRows = rows.filter(value => value.id !== currentRow.id)
+        setRows(newRows)
+    }
+
+    const columns: GridColDef[] = [
+        {
+            field: 'name',
+            headerName: 'NAME',
+            editable: true,
+            type: 'string',
+            flex: 1,
+        },
+        {
+            field: 'description',
+            headerName: 'DESCRIPTION',
+            editable: true,
+            type: 'string',
+            flex: 1,
+        },
+        {
+            field: 'validFrom',
+            headerName: 'VALID FROM',
+            editable: true,
+            type: 'dateTime',
+            flex: 1,
+        },
+        {
+            field: 'validTo',
+            headerName: 'VALID TO',
+            editable: true,
+            type: 'dateTime',
+            flex: 1,
+        },
+        {
+            field: 'action',
+            headerName: 'ACTIONS',
+            sortable: false,
+            flex: 0.5,
+            // disableClickEventBubbling: true,
+            renderCell: (params: any) => {
+                return (
+                    <Stack direction="row"
+                           divider={<Divider orientation="vertical" flexItem/>}
+                           spacing={2} sx={{height: '100%', width: '100%'}}>
+                        <Button title={'USE'} onClick={(e) => handleUse(e, params)}/>
+                        <Button title={'DELETE'} onClick={(e) => handleDelete(e, params)}/>
+                    </Stack>
+                );
+            },
+        }
+    ]
+
+    useEffect(() => {
+        setRows(templates);
+    }, []);
 
     const Footer = (props: any) => {
         return (

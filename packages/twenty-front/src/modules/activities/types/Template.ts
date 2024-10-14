@@ -8,7 +8,7 @@ export type Template = {
     validFrom?: Date,
     validTo?: Date,
     warehouseId?: UUID,
-    templateItems?: TemplateItem[]
+    templateItems: TemplateItem[]
 };
 
 export type TemplateItem = {
@@ -19,3 +19,9 @@ export type TemplateItem = {
     categoryId?: UUID,
     productId?: UUID
 };
+
+
+export type TemplateProps = {
+    warehouseId: UUID,
+    offerId: UUID
+}

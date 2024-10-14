@@ -13,7 +13,7 @@ import {useEffect} from 'react';
 import {getTemplatesForWarehouse} from '../api/templates';
 import {useRecoilState} from 'recoil';
 import {currentTemplatesState} from '../states/currentTemplatesState';
-import { UUID } from 'crypto';
+import {UUID} from 'crypto';
 
 const StyledTemplatesContainer = styled.div`
     display: flex;
@@ -59,7 +59,7 @@ export const Templates = ({
     }
     return (
         <StyledTemplatesContainer>
-            <TemplateList warehouseId={warehouseId}/>
+            <TemplateList warehouseId={warehouseId} offerId={targetableObject.id as UUID}/>
         </StyledTemplatesContainer>
     );
 };

@@ -1,5 +1,4 @@
 import {DataGrid, GridPagination, GridRowSelectionModel} from '@mui/x-data-grid';
-import {useColumns} from '@/activities/template/hooks/useColumns';
 import {useCachedProducts} from '@/activities/template/hooks/useCachedProducts';
 import {useRecoilState} from 'recoil';
 import {currentSelectedTemplateState} from '../states/currentSelectedTemplateState';
@@ -10,10 +9,13 @@ import {useEffect, useState} from 'react';
 import {TemplateItem} from '@/activities/types/Template';
 import {ThemeProvider, useTheme} from '@emotion/react';
 import {createTheme} from '@mui/material';
+import {currentTemplatesState} from '../states/currentTemplatesState';
+import {deleteTemplateItem} from '../api/templates';
+import {useColumns} from '../hooks/useColumns';
 
 const StyledTemplateItemsTable = styled.div`
     display: flex;
-    flex-direction: column;
+    flex-direction: column
 `;
 
 const StyledTemplateItemsTableHeader = styled.div``;
@@ -37,6 +39,10 @@ export const TemplateItemsTable = () => {
         },
     });
 
+    const [currentTemplates, setCurrentTemplates] = useRecoilState(
+        currentTemplatesState,
+    );
+
     const [currentSelectedTemplate, setCurrentSelectedTemplate] = useRecoilState(
         currentSelectedTemplateState,
     );
@@ -44,20 +50,24 @@ export const TemplateItemsTable = () => {
         currentSelectedTemplate?.templateItems || [],
     );
     const [cachedProducts, updateCachedProducts] = useCachedProducts();
-    const columns = useColumns(cachedProducts);
 
-    useEffect(() => {
-        setRows(currentSelectedTemplate?.templateItems || []);
-        rows.forEach((row) => {
-            if (row.manufacturerId && row.categoryId) {
-                updateCachedProducts(row.manufacturerId, row.categoryId);
-            }
+    const handleDelete = (e: any, params: any) => {
+        const currentRow = params.row;
+        const item = currentSelectedTemplate?.templateItems?.find(item => item.id === currentRow.id)
+        if (item) {
+            deleteTemplateItem(item.id);
+        }
+        const newRows = rows.filter(value => value.id !== currentRow.id)
+        setRows(newRows)
+    }
+
+    const addNewRow = () => {
+        const tempItems: TemplateItem[] = [...rows];
+        tempItems.push({
+            id: self.crypto.randomUUID(),
         });
-    }, [currentSelectedTemplate]);
-
-    const handleRowSelectionModelChange = (
-        rowSelectionModel: GridRowSelectionModel,
-    ) => {
+        setRows(tempItems);
+        setCurrentSelectedTemplate({...currentSelectedTemplate, templateItems: tempItems});
     };
 
     const handleProcessRowUpdate = (
@@ -78,14 +88,21 @@ export const TemplateItemsTable = () => {
         return updatedRow;
     };
 
-    const addNewRow = () => {
-        const tempItems: TemplateItem[] = [...rows];
-        tempItems.push({
-            id: self.crypto.randomUUID(),
-        });
-        setRows(tempItems);
-        setCurrentSelectedTemplate({...currentSelectedTemplate, templateItems: tempItems});
+    const handleRowSelectionModelChange = (
+        rowSelectionModel: GridRowSelectionModel,
+    ) => {
     };
+
+    const columns = useColumns(cachedProducts, handleDelete);
+
+    useEffect(() => {
+        setRows(currentSelectedTemplate?.templateItems || []);
+        rows.forEach((row) => {
+            if (row.manufacturerId && row.categoryId) {
+                updateCachedProducts(row.manufacturerId, row.categoryId);
+            }
+        });
+    }, [currentSelectedTemplate]);
 
     const Footer = (props: any) => {
         return (
@@ -107,7 +124,7 @@ export const TemplateItemsTable = () => {
         <>
             <StyledTemplateItemsTable>
                 <StyledTemplateItemsTableHeader>
-                    <h3>Templates Items</h3>
+                    <h3>Template Items</h3>
                 </StyledTemplateItemsTableHeader>
                 <ThemeProvider theme={MuiTheme}>
                     <StyledTemplateItemsTableContainer>
