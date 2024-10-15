@@ -55,7 +55,7 @@ export const getProducts = async (
         }
     }
 ;
-export const getTemplatesForWarehouse = async (warehouseId: UUID) => {
+export const getTemplatesForWarehouse = async (warehouseId: string) => {
     try {
         const response = await fetch(PRODUCT_CATALOGUE_URL + `/templates?warehouse-id=${warehouseId}`);
         if (!response.ok) {
@@ -90,7 +90,7 @@ export const upsertTemplate = async (
 };
 
 export const deleteTemplate = async (
-    templateId: UUID | undefined,
+    templateId: string | undefined,
 ) => {
     try {
         const response = await fetch(`${PRODUCT_CATALOGUE_URL}/templates/${templateId}`, {
@@ -107,7 +107,7 @@ export const deleteTemplate = async (
 };
 
 export const deleteTemplateItem = async (
-    templateItemId: UUID | undefined,
+    templateItemId: string | undefined,
 ) => {
     try {
         const response = await fetch(`${PRODUCT_CATALOGUE_URL}/templates/items/${templateItemId}`, {

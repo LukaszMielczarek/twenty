@@ -12,6 +12,7 @@ import {createTheme, Divider, Stack} from '@mui/material';
 import {deleteTemplate} from '../api/templates';
 import {useUpdateOneRecord} from '@/object-record/hooks/useUpdateOneRecord';
 import {CustomObjectNameSingular} from '@/object-metadata/types/CustomObjectNameSingular';
+import { v4 as uuidv4 } from 'uuid';
 
 const StyledTemplateTable = styled.div`
     display: flex;
@@ -86,11 +87,11 @@ export const TemplateTable = ({warehouseId, offerId}: TemplateProps) => {
     const addNewRow = () => {
         let newRows = [...rows];
         const newRow = {
-            id: self.crypto.randomUUID(),
+            id: uuidv4(),
             warehouseId: warehouseId,
             templateItems: [
                 {
-                    id: self.crypto.randomUUID(),
+                    id: uuidv4(),
                 },
             ],
         };

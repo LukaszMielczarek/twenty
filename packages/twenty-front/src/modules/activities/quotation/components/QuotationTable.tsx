@@ -3,6 +3,7 @@ import {
   GridCellModesModel,
   GridCellParams
 } from '@mui/x-data-grid';
+import { v4 as uuidv4 } from 'uuid';
 
 import {Item, Quotation} from '@/activities/types/Quotation';
 import {Button} from '@/ui/input/button/components/Button';
@@ -138,7 +139,7 @@ export const QuotationTable = ({
   const addNewRow = () => {
     let newData = [...data];
     newData.push({
-      id: self.crypto.randomUUID()
+      id: uuidv4()
     })
     setData(newData);
   }

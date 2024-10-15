@@ -12,6 +12,7 @@ import {createTheme} from '@mui/material';
 import {currentTemplatesState} from '../states/currentTemplatesState';
 import {deleteTemplateItem} from '../api/templates';
 import {useColumns} from '../hooks/useColumns';
+import { v4 as uuidv4 } from 'uuid';
 
 const StyledTemplateItemsTable = styled.div`
     display: flex;
@@ -64,7 +65,7 @@ export const TemplateItemsTable = () => {
     const addNewRow = () => {
         const tempItems: TemplateItem[] = [...rows];
         tempItems.push({
-            id: self.crypto.randomUUID(),
+            id: uuidv4(),
         });
         setRows(tempItems);
         setCurrentSelectedTemplate({...currentSelectedTemplate, templateItems: tempItems});
