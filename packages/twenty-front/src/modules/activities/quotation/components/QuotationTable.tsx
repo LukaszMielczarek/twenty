@@ -126,6 +126,8 @@ export const QuotationTable = ({
       newRow.unitPrice = 0;
       newRow.vatAmount = 0;
     } else if(prevRow.productId !== newRow.productId){
+      newRow.unitPrice = products[newRow.manufacturerId ?? -1][newRow.categoryId ?? -1]
+          .find((product: any) => product.id === newRow.productId).priceNet
       var response = await recalculate(newRow);
       newRow = response.data
     } else if ((prevRow.unitPrice !== newRow.unitPrice || prevRow.quantity !== newRow.quantity) && newRow.unitPrice && newRow.quantity) {
