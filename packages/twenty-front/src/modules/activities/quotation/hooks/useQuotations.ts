@@ -38,7 +38,7 @@ export const useQuotations = (targetableObject: ActivityTargetableObject) => {
         // Filter for .json attachments
         const jsonAttachments = attachments.filter(
           (attachment) =>
-            attachment.name.includes('calculation') &&
+            attachment.name.includes('quotation') &&
             attachment.name.endsWith('.json'),
         );
         // Download all quotations in parallel
