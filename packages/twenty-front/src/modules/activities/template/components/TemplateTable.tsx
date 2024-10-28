@@ -1,6 +1,7 @@
 import {DataGrid, GridColDef, GridPagination, GridRenderCellParams, GridRowSelectionModel} from '@mui/x-data-grid';
 import {useRecoilState} from 'recoil';
 import {currentTemplatesState} from '../states/currentTemplatesState';
+import {currentUsedTemplatesState} from '../states/currentUsedTemplatesState';
 import {currentSelectedTemplateState} from '../states/currentSelectedTemplateState';
 import styled from '@emotion/styled';
 import {Button} from '@/ui/input/button/components/Button';
@@ -8,11 +9,14 @@ import Grid from '@mui/material/Grid2';
 import {useEffect, useState} from 'react';
 import {Template, TemplateProps} from '@/activities/types/Template';
 import {ThemeProvider, useTheme} from '@emotion/react';
-import {createTheme, Divider, Stack} from '@mui/material';
+import {createTheme, Stack} from '@mui/material';
 import {deleteTemplate} from '../api/templates';
 import {useUpdateOneRecord} from '@/object-record/hooks/useUpdateOneRecord';
 import {CustomObjectNameSingular} from '@/object-metadata/types/CustomObjectNameSingular';
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
+import {useFindOneRecord} from '@/object-record/hooks/useFindOneRecord';
+
+const DELIMITER: string = ','
 
 const StyledTemplateTable = styled.div`
     display: flex;
@@ -43,6 +47,7 @@ export const TemplateTable = ({warehouseId, offerId}: TemplateProps) => {
     });
 
     const [templates, setTemplates] = useRecoilState(currentTemplatesState);
+    const [usedTemplates, setUsedTemplates] = useRecoilState(currentUsedTemplatesState);
     const [selectedTemplate, setSelectedTemplate] = useRecoilState(
         currentSelectedTemplateState,
     );
@@ -50,6 +55,14 @@ export const TemplateTable = ({warehouseId, offerId}: TemplateProps) => {
 
     const {updateOneRecord: updateOneActivity} = useUpdateOneRecord<any>({
         objectNameSingular: CustomObjectNameSingular.Offer,
+    });
+
+    useFindOneRecord({
+        objectNameSingular: CustomObjectNameSingular.Offer,
+        objectRecordId: offerId,
+        onCompleted: async (record) => {
+            setUsedTemplates((record['templateIds'] as String).split(DELIMITER))
+        }
     });
 
     const handleProcessRowUpdate = async (
@@ -102,12 +115,21 @@ export const TemplateTable = ({warehouseId, offerId}: TemplateProps) => {
 
     const handleUse = async (e: any, params: GridRenderCellParams) => {
         const currentRow = params.row;
+
+        let ids: String[] = []
+        if (usedTemplates.includes(currentRow.id)) { // if current Template ID is already delected - DEACTIVATE
+            ids = usedTemplates.filter(id => id !== currentRow.id)
+        } else { // ... otherwise - ACTIVATE
+            ids = [...usedTemplates, currentRow.id]
+        }
         return await updateOneActivity?.({
             idToUpdate: offerId,
             updateOneRecordInput: {
-                templateId: currentRow.id
+                templateIds: ids.join(DELIMITER) // as CRM does not have array type, store all ids as one string
             },
-        }).then(() => console.log(`Succesfuly set TemplateId: ${currentRow.id} on Offer: ${offerId}`));
+        }).then(() => {
+            setUsedTemplates(ids)
+        })
     }
 
     const handleDelete = (e: any, params: GridRenderCellParams) => {
@@ -158,10 +180,17 @@ export const TemplateTable = ({warehouseId, offerId}: TemplateProps) => {
             renderCell: (params: any) => {
                 return (
                     <Stack direction="row"
-                           divider={<Divider orientation="vertical" flexItem/>}
-                           spacing={2} sx={{height: '100%', width: '100%'}}>
-                        <Button title={'USE'} onClick={(e) => handleUse(e, params)}/>
-                        <Button title={'DELETE'} onClick={(e) => handleDelete(e, params)}/>
+                           justifyContent="center"
+                           alignItems="center"
+                           sx={{height: '100%', width: '100%'}}
+                    >
+                        <div>
+                            <Button title={usedTemplates.includes(params.id) ? 'DEACTIVATE' : 'ACTIVATE'}
+                                    onClick={(e) => handleUse(e, params)}/>
+                        </div>
+                        <div>
+                            <Button title={'DELETE'} onClick={(e) => handleDelete(e, params)}/>
+                        </div>
                     </Stack>
                 );
             },
